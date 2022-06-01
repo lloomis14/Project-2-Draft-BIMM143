@@ -1,0 +1,178 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Introduction
+Background
+Monoamine oxidase A and B are two proteins in humans that commonly degrade neurotransmitters like serotonin, norephinepherine, and dopamine. Specific polymorphisms and even full knockdowns in these have been shown to be linked to aggression, other significant changes in mood or behavior, and neurodegenerative disease. 
+
+In this protein there are two major binding domains one for and FAD critical to catalysis, and a substrate binding domain. Each of those are shown to be made of 3 separate loops or regions that make up the entire binding pocket.
+
+Shih, “From Genes to Behavior”, 1999,  https://www.annualreviews.org/doi/pdf/10.1146/annurev.neuro.22.1.197 
+
+Edmondson, “Structure and Mechanism of Monoamine Oxidase”, 2004 https://www.ingentaconnect.com/contentone/ben/cmc/2004/00000011/00000015/art00003?crawler=true&mimetype=application/pdf&casa_token=iHHUF5AkGZ0AAAAA:KSI-mrmlibjR1xBzVTqYG0VOSqAFW2f0nJUY2q9LkOP-vvk9krlA-9t9dOQOhBnErh_N4fTJvi10daS18JU 
+
+Shih, “Monoamine Oxidase in Neuropsychiatry and Behavior”, 1999 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1377964/pdf/10441564.pdf
+
+Gokhan, “Human Monoamine Oxidase A Gene Determines Levels of Enzyme Activity”, 1991
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1683299/pdf/ajhg00079-0136.pdf
+
+Stasiak, “Effects of Novel Monoamine Oxidases and Cholinesterases Targeting Compounds on Brain Neurotransmitters and Behavior in Rat Model of Vascular Dementia”, 2014 https://www.ingentaconnect.com/contentone/ben/cpd/2014/00000020/00000002/art00003?crawler=true 
+
+Scientific Question
+By comparing the protein sequences, and the proposed 3D structures, of MAO A, MAO B and zebra fish monoamine oxidases structural can functional differences between them be determined?
+
+Hypothesis
+If the functional differences of MAO A, MAO B and the MAO of the zebra fish is caused by the nucleotide sequence and protein structures, then these differences will be observable in the binding and activation pockets of these enzymes, by aligning the nucleotide sequences and possible  3D structures.
+
+https://bioconductor.org/packages/devel/bioc/vignettes/msa/inst/doc/msa.pdf 
+```{r}
+# if (!requireNamespace("devtools", quietly=TRUE))
+#     install.packages("devtools")
+# devtools::install_github("YuLab-SMU/ggmsa")
+
+```
+
+```{r}
+#loading my packages and making them invisible
+invisible(library(ggplot2))
+#gives me access to better graphing tools
+invisible(library(bio3d))
+#useful for reading/downloading PDB files and performing analysis on the structure
+invisible(library(msa))
+#package for my multiple sequence analysis
+
+
+```
+
+
+
+```{r}
+#Reading in my MAO A amino acid sequences, file taken from: https://www.ncbi.nlm.nih.gov/gene?Db=gene&Cmd=DetailsSearch&Term=4128
+
+MAOA_RNA <- readAAStringSet("./MAO_A_protein.faa")
+
+#splitting it into its isoforms
+
+MAOA_isoform1 <- MAOA_RNA[1]
+
+MAOA_isoform2 <- MAOA_RNA[2]
+
+#Reading in my MAO B amino acid sequences, file taken from: https://www.ncbi.nlm.nih.gov/gene/4129
+
+MAOB_RNA <- readAAStringSet("./MAO_B_protein.faa")
+
+#splitting into isoforms
+
+MAOB_isoform1 <- MAOB_RNA[1]
+
+MAOB_isoform2 <- MAOB_RNA[2]
+
+#Reading in my zebra fish amino acid sequences, file taken from: https://www.ncbi.nlm.nih.gov/protein/NP_997992.2/
+
+zfish_RNA <- readAAStringSet("./zfish_protein.faa")
+
+sequences <- c(MAOA_isoform1, MAOA_isoform2, MAOB_isoform1, MAOB_isoform2, zfish_RNA)
+
+alignment <- msa(sequences)
+
+#substrate binding domains 80-210, 286-390, 454-488
+#residue numbers taken from : https://www.ingentaconnect.com/contentone/ben/cmc/2004/00000011/00000015/art00003?crawler=true&mimetype=application/pdf&casa_token=iHHUF5AkGZ0AAAAA:KSI-mrmlibjR1xBzVTqYG0VOSqAFW2f0nJUY2q9LkOP-vvk9krlA-9t9dOQOhBnErh_N4fTJvi10daS18JU
+
+#msa code taken from / inspired by: https://bioconductor.org/packages/devel/bioc/vignettes/msa/inst/doc/msa.pdf
+
+#substrate binding domains
+masked1 <- alignment
+masked2 <-alignment
+masked3 <- alignment
+
+#FAD binding domains
+masked4 <- alignment
+masked5 <-alignment
+masked6 <- alignment
+
+#masking my sequences into each part
+
+#creating the ranges for the mask
+masking1.1 <- IRanges(start=1, end=79)
+masking1.2 <- IRanges(start=211, end=530)
+
+#applying the mask to my specific sequences
+colmask(masked1) <- masking1.1
+colmask(masked1) <- masking1.2
+
+#repeat for all of the samples
+masking2.1 <- IRanges(start=1, end=285)
+masking2.2 <- IRanges(start=391, end=530)
+
+colmask(masked2) <- masking2.1
+colmask(masked2) <- masking2.2
+
+masking3.1 <- IRanges(start=1, end=453)
+masking3.2 <- IRanges(start=489, end=530)
+
+colmask(masked3) <- masking3.1
+colmask(masked3) <- masking3.2
+
+#FAD binding domains 4-79, 211-285, 391-453
+
+masking4.1 <- IRanges(start=1, end=3)
+masking4.2 <- IRanges(start=80, end=530)
+
+colmask(masked4) <- masking4.1
+colmask(masked4) <- masking4.2
+
+masking5.1 <- IRanges(start=1, end=210)
+masking5.2 <- IRanges(start=286, end=530)
+
+colmask(masked5) <- masking5.1
+colmask(masked5) <- masking5.2
+
+masking6.1 <- IRanges(start=1, end=390)
+masking6.2 <- IRanges(start=454, end=530)
+
+colmask(masked6) <- masking6.1
+colmask(masked6) <- masking6.2
+
+#BLOSUM62 is defuault scoring matrix for BLASTP
+# https://bio.libretexts.org/Bookshelves/Cell_and_Molecular_Biology/Book%3A_Investigations_in_Molecular_Cell_Biology_(O'Connor)/09%3A_Protein_Conservation/9.05%3A_BLOSUM62_scoring_matrix_for_amino_acid_substitutions#:~:text=The%20BLOSUM62%20matrix%20is%20used,when%20two%20proteins%20were%20aligned.
+data(BLOSUM62)
+
+#creating conservation score matrices for each amino acid in my masked sequences
+ConScore1 <- msaConservationScore(masked1, BLOSUM62)
+ConScore2 <-msaConservationScore(masked2, BLOSUM62)
+ConScore3 <-msaConservationScore(masked3, BLOSUM62)
+ConScore4 <- msaConservationScore(masked4, BLOSUM62)
+ConScore5 <-msaConservationScore(masked5, BLOSUM62)
+ConScore6 <-msaConservationScore(masked6, BLOSUM62)
+
+#taking the sum of those to get the total conservation
+Sub1 <- sum(ConScore1, na.rm = TRUE)
+Sub2 <-sum(ConScore2, na.rm = TRUE)
+Sub3 <-sum(ConScore3, na.rm = TRUE)
+FAD1 <-sum(ConScore4, na.rm = TRUE)
+FAD2 <-sum(ConScore5, na.rm = TRUE)
+FAD3 <-sum(ConScore6, na.rm = TRUE)
+
+#creating a plot of these conservation scores
+conscores <- c(Sub1, Sub2, Sub3, FAD1, FAD2, FAD3)
+
+plotting <- matrix(nrow = 6, ncol = 2)
+
+plotting[,1]<- c("Sub1", "Sub2", "Sub3", "FAD1", "FAD2", "FAD3")
+
+colnames(plotting) <- c("Region","Conservation_Score")
+
+plotting[ ,2] = conscores
+
+plotting <- data.frame(plotting)
+
+ggplot(data = plotting, aes(x = Region, y = Conservation_Score)) +
+         geom_bar(stat="identity")
+
+#I would also like to add a heat map description of this, but was having issues figuring out exactly how I should do that.
+
+#Also was not able to get to my second analysis at all (I am so sorry)
+```
+
+
