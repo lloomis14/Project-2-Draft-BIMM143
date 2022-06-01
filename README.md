@@ -14,4 +14,4 @@ MAO_B_protein.faa: Like the MAO A protein above it is a protein coded by the hum
 zfish_protein.faa: Unlike the two above this is not from the human genome, but instead that of the zebra fish
 
 
-Project 2C.nb.html is a very rough draft of my project 2, and will be working on improving before the deadline.
+Project 2C.nb.html is a very rough draft of my project 2, and will be working on improving it before the deadline.
